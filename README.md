@@ -1,4 +1,4 @@
-# OpenShift Pipelines Tutorial
+# OpenShift Pipelines Tutorial for IBM Cloud
 
 Welcome to the OpenShift Pipelines tutorial!
 
@@ -26,9 +26,8 @@ In this tutorial you will:
 
 ## Prerequisites
 
-You need an OpenShift 4 cluster in order to complete this tutorial. If you don't have an existing cluster, go to http://try.openshift.com and register for free in order to get an OpenShift 4 cluster up and running on AWS within minutes.
-
-You will also use the Tekton CLI (`tkn`) through out this tutorial. Download the Tekton CLI by following [instructions](https://github.com/tektoncd/cli#installing-tkn) available on the CLI GitHub repository.
+* OpenShift Cluster (4.4.x or higher) on IBM Clooud.
+* Tekton CLI (`tkn`). Download [instructions](https://github.com/tektoncd/cli#installing-tkn) available on the CLI GitHub repository.
 
 ## Concepts
 
@@ -92,6 +91,7 @@ OpenShift Pipelines is provided as an add-on on top of OpenShift that can be ins
 
 ## Deploy Sample Application
 
+Ensure you are logged into the cluster.
 Create a project for the sample application that you will be using in this tutorial:
 
 ```bash
@@ -155,15 +155,21 @@ When a task starts running, it starts a pod and runs each step sequentially in a
 
 Note that only the requirement for a git repository is declared on the task and not a specific git repository to be used. That allows tasks to be reusable for multiple pipelines and purposes. You can find more examples of reusable tasks in the [Tekton Catalog](https://github.com/tektoncd/catalog) and [OpenShift Catalog](https://github.com/openshift/pipelines-catalog) repositories.
 
+Check out the repo:
+```bash
+git clone https://github.com/rojanjose/pipelines-tutorial.git
+cd pipelines-tutorial
+```
+
 Install the `apply-manifests` and `update-deployment` tasks from the repository using `oc` or `kubectl`, which you will need for creating a pipeline in the next section:
 
 ```bash
-$ oc create -f https://raw.githubusercontent.com/openshift/pipelines-tutorial/master/01_pipeline/01_apply_manifest_task.yaml
+oc create -f 01_pipeline/01_apply_manifest_task.yaml
 
-$ oc create -f https://raw.githubusercontent.com/openshift/pipelines-tutorial/master/01_pipeline/02_update_deployment_task.yaml
+oc create -f 01_pipeline/02_update_deployment_task.yaml
 ```
 
-You can take a look at the tasks you created using the [Tekton CLI](https://github.com/tektoncd/cli/releases):
+View the tasks you created using the [Tekton CLI](https://github.com/tektoncd/cli/releases):
 
 ```
 $ tkn task ls
@@ -173,40 +179,49 @@ apply-manifests     10 seconds ago
 update-deployment   4 seconds ago
 ```
 
-We will be using `buildah` clusterTasks, which gets installed along with Operator. Operator installs few ClusterTask which you can see.
+Cluster Tasks are installed by the pipline operator. View the cluster tasks by running:
 
 ```bash
 $ tkn clustertasks ls
 NAME                       DESCRIPTION   AGE
-buildah                                  1 day ago
-buildah-v0-11-3                          1 day ago
-jib-maven                                1 day ago
-kn                                       1 day ago
-maven                                    1 day ago
-openshift-client                         1 day ago
-openshift-client-v0-11-3                 1 day ago
-s2i                                      1 day ago
-s2i-dotnet-3                             1 day ago
-s2i-dotnet-3-v0-11-3                     1 day ago
-s2i-go                                   1 day ago
-s2i-go-v0-11-3                           1 day ago
-s2i-java-11                              1 day ago
-s2i-java-11-v0-11-3                      1 day ago
-s2i-java-8                               1 day ago
-s2i-java-8-v0-11-3                       1 day ago
-s2i-nodejs                               1 day ago
-s2i-nodejs-v0-11-3                       1 day ago
-s2i-perl                                 1 day ago
-s2i-perl-v0-11-3                         1 day ago
-s2i-php                                  1 day ago
-s2i-php-v0-11-3                          1 day ago
-s2i-python-3                             1 day ago
-s2i-python-3-v0-11-3                     1 day ago
-s2i-ruby                                 1 day ago
-s2i-ruby-v0-11-3                         1 day ago
-s2i-v0-11-3                              1 day ago
-tkn                                      1 day ago
+buildah                                  1 hour ago
+buildah-v0-11-3                          1 hour ago
+git-clone                                1 hour ago
+jib-maven                                1 hour ago
+kn                                       1 hour ago
+maven                                    1 hour ago
+openshift-client                         1 hour ago
+openshift-client-v0-11-3                 1 hour ago
+s2i                                      1 hour ago
+s2i-dotnet-3                             1 hour ago
+s2i-dotnet-3-v0-11-3                     1 hour ago
+s2i-go                                   1 hour ago
+s2i-go-v0-11-3                           1 hour ago
+s2i-java-11                              1 hour ago
+s2i-java-11-v0-11-3                      1 hour ago
+s2i-java-8                               1 hour ago
+s2i-java-8-v0-11-3                       1 hour ago
+s2i-nodejs                               1 hour ago
+s2i-nodejs-v0-11-3                       1 hour ago
+s2i-perl                                 1 hour ago
+s2i-perl-v0-11-3                         1 hour ago
+s2i-php                                  1 hour ago
+s2i-php-v0-11-3                          1 hour ago
+s2i-python-3                             1 hour ago
+s2i-python-3-v0-11-3                     1 hour ago
+s2i-ruby                                 1 hour ago
+s2i-ruby-v0-11-3                         1 hour ago
+s2i-v0-11-3                              1 hour ago
+tkn                                      1 hour ago
 ```
+
+We will a modified version of `buildah` cluster task that is configure to run for OpenShift cluster on IBM Cloud.
+
+```bash
+oc create -f 01_pipeline/05_buildah-roks.yaml
+
+```
+
 
 ## Create Pipeline
 
@@ -236,7 +251,7 @@ spec:
   tasks:
   - name: build-image
     taskRef:
-      name: buildah
+      name: buildah-roks
       kind: ClusterTask
     resources:
       inputs:
@@ -307,7 +322,7 @@ The execution order of task is determined by dependencies that are defined betwe
 Create the pipeline by running the following:
 
 ```bash
-$ oc create -f https://raw.githubusercontent.com/openshift/pipelines-tutorial/master/01_pipeline/04_pipeline.yaml
+oc create -f 01_pipeline/04_pipeline.yaml
 ```
 
 Alternatively, in the OpenShift Web Console, you can click on the **+** at the top right of the screen while you are in the **pipelines-tutorial** project:
@@ -396,7 +411,7 @@ spec:
 Create the above pipeline resources via the OpenShift Web Console or by running the following:
 
 ```bash
-$ oc create -f https://raw.githubusercontent.com/openshift/pipelines-tutorial/master/01_pipeline/03_resources.yaml
+oc create -f 01_pipeline/03_resources.yaml
 ```
 
 > **Note** :-
@@ -490,6 +505,9 @@ You can get the route of the application by executing the following command and 
 $ oc get route vote-ui --template='http://{{.spec.host}}'
 ```
 
+Open the route in browser.
+![Application UI](docs/images/application-ui.png)
+
 
 If you want to re-run the pipeline again, you can use the following short-hand command to rerun the last pipelinerun again that uses the same pipeline resources and service account used in the previous pipeline run:
 
@@ -502,12 +520,6 @@ Whenever there is any change to your repository we need to start pipeline explic
 # Triggers
 
 Triggers in conjuntion with pipelines enable us to hook our Pipelines to respond to external github events (push events, pull requests etc).
-
-## Prerequisites
-
-You need an latest OpenShift 4 cluster running on AWS in order to complete this tutorial. If you don't have an existing cluster, go to http://try.openshift.com and register for free in order to get an OpenShift 4 cluster up and running on AWS within minutes.
-
->***NOTE:*** Running cluster localy [crc](https://github.com/code-ready/crc/releases) won't work, as we need `webhook-url` to be accessable to `github-repos`
 
 ### Adding Triggers to our Application:
 
@@ -580,7 +592,7 @@ spec:
 * Run following command to apply Triggertemplate.
 
 ```bash
-$ oc create -f https://raw.githubusercontent.com/openshift/pipelines-tutorial/master/03_triggers/02_template.yaml
+oc create -f 03_triggers/02_template.yaml
 ```
 
 
@@ -609,7 +621,7 @@ The exact paths (keys) of parameter we need can be found by examining the event 
 Run following command to apply Triggertemplate.
 
 ```bash
-$ oc create -f https://raw.githubusercontent.com/openshift/pipelines-tutorial/master/03_triggers/01_binding.yaml
+oc create -f 03_triggers/01_binding.yaml
 ```
 
 #### Event Listener
@@ -637,7 +649,7 @@ spec:
 * Run following command to create Triggertemplate.
 
 ```bash
-$ oc create -f https://raw.githubusercontent.com/openshift/pipelines-tutorial/master/03_triggers/03_event_listener.yaml
+oc create -f 03_triggers/03_event_listener.yaml
 ```
 
 >***Note***: EventListener will setup a Service. We need to expose that Service as an OpenShift Route to make it publicly accessible.
@@ -706,5 +718,4 @@ To github.com:<github-username>/vote-api.git
 
 Watch OpenShift WebConsole Developer perspective and a PipelineRun will be automatically created.
 
-![pipeline-run-api](docs/images/pipeline-run-api.png
-)
+![pipeline-run-api](docs/images/pipeline-run-api.png)

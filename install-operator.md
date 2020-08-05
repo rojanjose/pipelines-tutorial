@@ -12,22 +12,27 @@ Go to **Operators > OperatorHub** in the Web Console. You can see the list of av
 
 In the search bar where it says `Filter by keyword...`, type OpenShift Pipelines to find the **OpenShift Pipelines Operator**:
 
-![OpenShift OperatorHub](docs/images/pipelines-operator.png)
+![OpenShift OperatorHub](docs/images/pipelines-operator-1.png)
 
-Click on **OpenShift Pipelines Operator**, **Continue**, and then **Install**:
+Click on **OpenShift Pipelines Operator** tile (provided by Red Hat, that is NOT the community edition), and then **Install**:
 
-![OpenShift Pipelines Operator 1](docs/images/operator-install-1.png)
+![OpenShift Pipelines Operator 1](docs/images/operator-install-11.png)
 
 Leave the default settings and click on **Subscribe** in order to subscribe to the installation and update channels:
 
-![OpenShift Pipelines Operator 2](docs/images/operator-install-2.png)
+![OpenShift Pipelines Operator 2](docs/images/operator-install-22.png)
 
 After clicking **Subscribe**, you will be taken to the **Installed Operators** page. If you do not see the **OpenShift Pipelines Operator** as shown below, simply wait a moment while the **OpenShift Pipelines Operator** finishes installation:
 
-![OpenShift Pipelines Operator 3](docs/images/operator-install-3.png)
+![OpenShift Pipelines Operator 3](docs/images/operator-install-33.png)
 
 That's all. The operator now installs OpenShift Pipelines on the cluster.
 
 You can confirm the following by checking tekton-pipelines and tekton-triggers pods with `Running` state in `openshift-pipelines` namespace. If so, openshift-pielines have been installed on your cluster.
 
-![OpenShift Pipelines Operator 4](docs/images/operator-install-4.png)
+![OpenShift Pipelines Operator 4](docs/images/operator-install-44.png)
+
+
+Refresh the console. You should see the **Piplelines** link in the left nav with some defult pipelines and cluster tasks.
+
+![OpenShift Pipelines Operator 5](docs/images/operator-install-55.png)

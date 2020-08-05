@@ -15,7 +15,7 @@ spec:
   tasks:
   - name: build-image
     taskRef:
-      name: buildah
+      name: buildah-roks
       kind: ClusterTask
     resources:
       inputs:
